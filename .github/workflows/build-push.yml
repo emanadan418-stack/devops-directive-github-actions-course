@@ -33,12 +33,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Image
+      - name: Set image name
+        id: image
+        run: |
+          IMAGE_NAME=$(echo "${{ matrix.service }}" | tr '/' '-')
+          echo "name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Image
         working-directory: capstone/${{ matrix.service }}
         run: |
           docker build \
-          -t ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.sha }} .
+          -t ghcr.io/${{ github.repository }}/${{ steps.image.outputs.name }}:latest \
+          -t ghcr.io/${{ github.repository }}/${{ steps.image.outputs.name }}:${{ github.ref_name }} .
 
-      - name: Push Image
+      - name: Push Docker Image
         run: |
-          docker push ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}/${{ steps.image.outputs.name }}:latest
+          docker push ghcr.io/${{ github.repository }}/${{ steps.image.outputs.name }}:${{ github.ref_name }}
