@@ -1,0 +1,31 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - services/go/api-golang
+          - services/node/api-node
+          - services/python/load-generator-python
+          - services/react/client-react
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        working-directory: capstone/${{ matrix.service }}
+        run: |
+          docker build -t ${{ matrix.service }}:latest .
+
+      - name: Show Image
+        run: docker images
