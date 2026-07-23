@@ -1,0 +1,34 @@
+name: Update GitOps Manifests
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-manifests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update GitOps manifests
+        run: |
+          echo "Updating Kubernetes manifests..."
+          echo "Image tag: ${{ github.sha }}"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          git commit -m "update image tag to ${{ github.sha }}" || echo "No changes to commit"
+
+          git push
